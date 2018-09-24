@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
-
+import java.util.*;
+import java.text.*;
 
 public class Server {
 
@@ -11,17 +12,27 @@ public class Server {
 
         DatagramPacket DpReceive = null;
 
+        System.out.println("Server Started");
+
         while(true) {
 
+            String timeStamp = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss ").format(new java.util.Date());
             DpReceive = new DatagramPacket(receive, receive.length);
 
             ds.receive(DpReceive);
 
-            System.out.println("Client:-" + data(receive));
+            String response = (timeStamp + "Server:-" + data(receive));
+            System.out.println(response);
+
+            byte[] ref = (response).getBytes();
+            DatagramPacket out = new DatagramPacket(ref, ref.length, DpReceive.getAddress(), DpReceive.getPort());
+            ds.send(out);
 
             if(data(receive).toString().equals("bye")) {
+
                 System.out.println("Client sent bye");
                 break;
+
             }
 
             receive = new byte[65535];
@@ -29,19 +40,20 @@ public class Server {
     }
 
     public static StringBuilder data(byte[] a){
-        if (a == null) {
+
+        if (a == null) 
             return null;
-        }
 
-        StringBuilder ret = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         int i = 0;
-        while(a[i] != 0) {
-            ret.append((char)a[i]);
 
+        while(a[i] != 0) {
+
+            sb.append((char)a[i]);
             i++;
         }
 
-        return ret;
+        return sb;
     }
 
 }
