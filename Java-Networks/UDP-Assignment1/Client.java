@@ -6,7 +6,7 @@ public class Client {
 
     public static void main(String[] args) throws java.io.IOException {
 
-        byte ssp[] = new byte[4000];
+        byte rec[] = new byte[4000];
         Scanner scan = new Scanner(System.in);
 
         DatagramSocket ds = new DatagramSocket();
@@ -30,11 +30,33 @@ public class Client {
                 break;
             }
 
-            DatagramPacket DpReceive = new DatagramPacket(ssp, ssp.length);
-            ds.receive(DpReceive);
+            ds.setSoTimeout(3000);
+            boolean continueSending = true;
+            int counter = 0;
 
-            String response = (data(ssp) + " ");
-            System.out.println(response);
+            DatagramPacket DpReceive = new DatagramPacket(rec, rec.length);
+
+            while(continueSending && counter < 10) {
+                counter++;
+
+                try {
+
+                    ds.receive(DpReceive);
+                    continueSending = false;
+                    String response = (data(rec) + " ");
+                    System.out.println(response);
+
+                } catch (SocketTimeoutException e) {
+
+                    // no response in 3 seconds
+                    System.out.println("No response in 3 secs");
+                    System.out.println("Type 'bye' to exit");
+                    break;
+
+                }
+            }
+
+            
 
         }
 
